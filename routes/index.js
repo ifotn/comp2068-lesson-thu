@@ -8,8 +8,8 @@ var passport = require('passport');
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', {
-    title: 'Lesson 8',
-    message: 'Authentication with Passport - Part 1',
+    title: 'Lesson 9',
+    message: 'Authentication with Passport OAuth - Part 2',
     user: req.user
   });
 });
@@ -43,14 +43,15 @@ router.get('/login', function(req, res, next) {
   // get session messages if there are any
   var messages = req.session.messages || [];
 
+  // clear the messages out of the session
+  req.session.messages = null;
+
   res.render('login', {
     title: 'Login',
     messages: messages,
     user: req.user
   });
 
-  // clear the messages out of the session
- req.session.messages = null;
 });
 
 /* POST login page */
