@@ -40,6 +40,88 @@ app.use(passport.session());
 var Account = require('./models/account');
 passport.use(Account.createStrategy());
 
+// facebook auth configuration
+var facebookStrategy = require('passport-facebook').Strategy;
+
+passport.use(new facebookStrategy({
+  clientID: config.ids.facebook.clientID,
+  clientSecret: config.ids.facebook.clientSecret,
+  callbackURL: config.ids.facebook.callbackURL
+},
+function(accessToken, refreshToken, profile, cb)
+{
+  // check if mongodb already has this user
+  Account.findOne({ oauthID: profile.id }, function(err, user) {
+    if (err) {
+      console.log(err);
+    }
+    else {
+      if (user !== null) {
+        // this user has already registered via facebook, so continue
+        cb(null, user);
+      }
+      else {
+        // user is new to us, so save them to accounts collection
+        user = new Account({
+          oauthID: profile.id,
+          username: profile.displayName,
+          created: Date.now()
+        });
+
+        user.save(function(err) {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            cb(null, user);
+          }
+        });
+      }
+    }
+  });
+}));
+
+// github auth configuration
+var githubStrategy = require('passport-github').Strategy;
+
+passport.use(new githubStrategy({
+      clientID: config.ids.github.clientID,
+      clientSecret: config.ids.github.clientSecret,
+      callbackURL: config.ids.github.callbackURL
+},
+function(accessToken, refreshToken, profile, cb)
+{
+  // check if mongodb already has this user
+  Account.findOne({ oauthID: profile.id }, function(err, user) {
+    if (err) {
+      console.log(err);
+    }
+    else {
+      if (user !== null) {
+        // this user has already registered via github, so continue
+        cb(null, user);
+      }
+      else {
+        // user is new to us, so save them to accounts collection
+        user = new Account({
+          oauthID: profile.id,
+          username: profile.username,
+          created: Date.now()
+        });
+
+        user.save(function(err) {
+          if (err) {
+            console.log(err);
+          }
+          else {
+            cb(null, user);
+          }
+        });
+      }
+    }
+  });
+}));
+
 // manage sessions through the db
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
